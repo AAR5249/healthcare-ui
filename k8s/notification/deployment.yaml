@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: local/medibook-notification:latest
-          imagePullPolicy: Never
+          image: docker.io/local/medibook-notification-service:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8003
           env:

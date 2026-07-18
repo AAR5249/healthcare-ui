@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: appointment-service
-          image: local/medibook-appointment:latest
-          imagePullPolicy: Never
+          image: docker.io/local/medibook-appointment-service:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8002
           env:
