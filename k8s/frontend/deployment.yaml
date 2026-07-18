@@ -20,7 +20,7 @@ spec:
       containers:
         - name: frontend
           image: local/medibook-frontend:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
           resources:
