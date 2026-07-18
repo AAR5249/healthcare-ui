@@ -44,7 +44,7 @@ export class AppointmentService {
       },
     });
 
-    await eventPublisher.publishAppointmentCreated(appointment);
+    await eventPublisher.publishAppointmentCreated(formatAppointment(appointment));
     logger.info(`Appointment created: ${appointment.id}`, { appointmentId: appointment.id });
 
     return formatAppointment(appointment);
