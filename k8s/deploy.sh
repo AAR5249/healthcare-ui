@@ -17,12 +17,14 @@ kubectl apply $NAMESPACE_OPTION -f auth/deployment.yaml
 kubectl apply $NAMESPACE_OPTION -f appointment/deployment.yaml
 kubectl apply $NAMESPACE_OPTION -f notification/deployment.yaml
 kubectl apply $NAMESPACE_OPTION -f gateway/deployment.yaml
+kubectl apply $NAMESPACE_OPTION -f frontend/deployment.yaml
 
 # Wait for deployments to be ready
 kubectl rollout status $NAMESPACE_OPTION deployment/gateway
 kubectl rollout status $NAMESPACE_OPTION deployment/auth-service
 kubectl rollout status $NAMESPACE_OPTION deployment/appointment-service
 kubectl rollout status $NAMESPACE_OPTION deployment/notification-service
+kubectl rollout status $NAMESPACE_OPTION deployment/frontend
 
 # Show services
 kubectl get services $NAMESPACE_OPTION

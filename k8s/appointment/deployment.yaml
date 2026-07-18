@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: appointment-service
-          image: medibook/appointment-service:latest
-          imagePullPolicy: IfNotPresent
+          image: local/medibook-appointment:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8002
           env:

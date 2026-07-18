@@ -42,7 +42,7 @@ echo -e "${GREEN}✓ Notification Service built successfully${NC}\n"
 
 # Build Frontend
 echo -e "${YELLOW}Building Frontend...${NC}"
-docker build -t "$REGISTRY/medibook-frontend:$VERSION" -f ./frontend/Dockerfile -C frontend .
+docker build -t "$REGISTRY/medibook-frontend:$VERSION" -f ./frontend/Dockerfile .
 echo -e "${GREEN}✓ Frontend built successfully${NC}\n"
 
 echo -e "${GREEN}=== All images built successfully! ===${NC}"

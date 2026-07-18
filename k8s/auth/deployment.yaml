@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: medibook/auth-service:latest
-          imagePullPolicy: IfNotPresent
+          image: local/medibook-auth:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8001
           env:
