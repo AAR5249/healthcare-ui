@@ -4,13 +4,13 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY gateway/package.json gateway/package-lock.json* ./
 
 # Install dependencies
 RUN npm install
 
 # Copy source code
-COPY . .
+COPY gateway/. .
 
 # Build TypeScript
 RUN npm run build
