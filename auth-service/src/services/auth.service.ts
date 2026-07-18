@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '../config/prisma';
 import { config } from '../config';
@@ -151,14 +151,18 @@ export class AuthService {
       role: user.role as any,
     };
 
-    const accessToken = jwt.sign(payload, config.jwt.secret, {
+    const accessTokenOptions: SignOptions = {
       expiresIn: config.jwt.expiresIn,
-    });
+    };
+    const accessToken = jwt.sign(payload, config.jwt.secret, accessTokenOptions);
 
+    const refreshTokenOptions: SignOptions = {
+      expiresIn: config.jwt.refreshExpiresIn,
+    };
     const refreshToken = jwt.sign(
       { userId: user.id, type: 'refresh' },
       config.jwt.secret,
-      { expiresIn: config.jwt.refreshExpiresIn }
+      refreshTokenOptions
     );
 
     const refreshTokenExpiry = new Date();

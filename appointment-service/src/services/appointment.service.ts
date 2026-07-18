@@ -97,7 +97,7 @@ export class AppointmentService {
     });
 
     if (data.status && data.status !== oldStatus) {
-      await eventPublisher.publishAppointmentUpdated(appointment as Appointment, oldStatus);
+      await eventPublisher.publishAppointmentUpdated(formatAppointment(appointment), oldStatus);
     }
 
     logger.info(`Appointment updated: ${id}`, { appointmentId: id, data });
