@@ -10,14 +10,14 @@ NAMESPACE_OPTION="-n $NAMESPACE"
 kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
 
 # Apply ConfigMap and Secrets
-kubectl apply $NAMESPACE_OPTION -f configmap.yaml
+kubectl apply $NAMESPACE_OPTION -f k8s/configmap.yaml
 
 # Apply all service deployments
-kubectl apply $NAMESPACE_OPTION -f auth/deployment.yaml
-kubectl apply $NAMESPACE_OPTION -f appointment/deployment.yaml
-kubectl apply $NAMESPACE_OPTION -f notification/deployment.yaml
-kubectl apply $NAMESPACE_OPTION -f gateway/deployment.yaml
-kubectl apply $NAMESPACE_OPTION -f frontend/deployment.yaml
+kubectl apply $NAMESPACE_OPTION -f k8s/auth/deployment.yaml
+kubectl apply $NAMESPACE_OPTION -f k8s/appointment/deployment.yaml
+kubectl apply $NAMESPACE_OPTION -f k8s/notification/deployment.yaml
+kubectl apply $NAMESPACE_OPTION -f k8s/gateway/deployment.yaml
+kubectl apply $NAMESPACE_OPTION -f k8s/frontend/deployment.yaml
 
 # Wait for deployments to be ready
 kubectl rollout status $NAMESPACE_OPTION deployment/gateway
