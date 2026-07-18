@@ -1,0 +1,79 @@
+# Prometheus Configuration for MediBook Healthcare System
+# Scrape config for monitoring all microservices
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'medibook-monitor'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+      # Uncomment to enable alertmanager:
+      # - targets: ['alertmanager:9093']
+
+rule_files:
+  # - "alert_rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # API Gateway
+  - job_name: 'gateway'
+    static_configs:
+      - targets: ['gateway:8000']
+        labels:
+          service: 'gateway'
+    metrics_path: '/metrics'
+
+  # Auth Service
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:8001']
+        labels:
+          service: 'auth'
+    metrics_path: '/metrics'
+
+  # Appointment Service
+  - job_name: 'appointment-service'
+    static_configs:
+      - targets: ['appointment-service:8002']
+        labels:
+          service: 'appointment'
+    metrics_path: '/metrics'
+
+  # Notification Service
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:8003']
+        labels:
+          service: 'notification'
+    metrics_path: '/metrics'
+
+  # Redis Exporter (optional)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+
+  # PostgreSQL Exporter (optional)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+
+  # Node Exporter for host metrics (optional)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node'

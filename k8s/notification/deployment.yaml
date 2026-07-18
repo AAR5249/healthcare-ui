@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  labels:
+    app: medibook
+    service: notification
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: medibook
+      service: notification
+  template:
+    metadata:
+      labels:
+        app: medibook
+        service: notification
+    spec:
+      containers:
+        - name: notification-service
+          image: medibook/notification-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8003
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: medibook-config
+                  key: NOTIFICATION_PORT
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: medibook-secrets
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: medibook-secrets
+                  key: REDIS_URL
+            - name: NOTIFICATION_CHANNEL
+              valueFrom:
+                configMapKeyRef:
+                  name: medibook-config
+                  key: NOTIFICATION_CHANNEL
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: medibook-secrets
+                  key: SMTP_HOST
+            - name: SMTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: medibook-config
+                  key: SMTP_PORT
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: medibook-secrets
+                  key: SMTP_USER
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: medibook-secrets
+                  key: SMTP_PASS
+            - name: EMAIL_FROM
+              valueFrom:
+                configMapKeyRef:
+                  name: medibook-config
+                  key: EMAIL_FROM
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /notifications/health
+              port: 8003
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /notifications/health
+              port: 8003
+            initialDelaySeconds: 15
+            periodSeconds: 60
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  labels:
+    app: medibook
+    service: notification
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8003
+      targetPort: 8003
+      protocol: TCP
+      name: http
+  selector:
+    app: medibook
+    service: notification

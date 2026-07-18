@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f4f6f5;
+  color: #16211f;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Fraunces', ui-serif, Georgia, serif;
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-accent-500 text-white hover:bg-accent-600 focus:ring-accent-400 shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply bg-primary-50 text-primary-700 hover:bg-primary-100 focus:ring-primary-300;
+  }
+
+  .btn-danger {
+    @apply bg-error-50 text-error-600 hover:bg-error-100 focus:ring-error-500;
+  }
+
+  .btn-success {
+    @apply bg-success-50 text-success-600 hover:bg-success-100 focus:ring-success-500;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 border border-primary-100 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-150;
+  }
+
+  .card {
+    @apply bg-white rounded-card shadow-sm border border-primary-50 p-6;
+  }
+
+  .link {
+    @apply text-primary-600 hover:text-primary-700 font-medium transition-colors;
+  }
+}
+
+@layer utilities {
+  /* Perforated "ticket stub" edge used on appointment cards */
+  .ticket-notch::before,
+  .ticket-notch::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    background: #ffffff;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+  .ticket-notch::before {
+    left: -9px;
+  }
+  .ticket-notch::after {
+    right: -9px;
+  }
+}

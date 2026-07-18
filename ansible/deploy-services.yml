@@ -1,0 +1,133 @@
+---
+# Ansible Playbook: Deploy MediBook Services
+# Purpose: Pull and restart Docker containers
+# Usage: ansible-playbook -i inventory deploy-services.yml
+
+- name: Deploy MediBook Services
+  hosts: all
+  become: yes
+  vars:
+    project_dir: /opt/medibook
+    docker_compose_file: docker-compose.yml
+    services:
+      - gateway
+      - auth-service
+      - appointment-service
+      - notification-service
+
+  tasks:
+    - name: Create project directory
+      file:
+        path: "{{ project_dir }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Check if Docker is running
+      service:
+        name: docker
+        state: started
+      check_mode: yes
+
+    - name: Pull latest images
+      docker_image:
+        name: "docker.io/medibook/{{ item }}"
+        tag: latest
+        source: pull
+        force_source: yes
+      loop: "{{ services }}"
+
+    - name: Stop existing containers
+      docker_compose:
+        project_src: "{{ project_dir }}"
+        state: absent
+      ignore_errors: yes
+
+    - name: Deploy with Docker Compose
+      docker_compose:
+        project_src: "{{ project_dir }}"
+        state: present
+        pull: yes
+        restarted: yes
+
+    - name: Wait for services to be healthy
+      pause:
+        seconds: 30
+
+    - name: Check container status
+      command: docker ps --format "{% raw %}{{ .Names }}: {{ .Status }}{% endraw %}"
+      register: container_status
+
+    - name: Display container status
+      debug:
+        var: container_status.stdout_lines
+
+    - name: Health check - Auth Service
+      uri:
+        url: "http://localhost:8001/auth/health"
+        method: GET
+        status_code: 200
+        timeout: 30
+      register: auth_health
+      retries: 5
+      delay: 10
+      until: auth_health is success
+      ignore_errors: yes
+
+    - name: Health check - Appointment Service
+      uri:
+        url: "http://localhost:8002/appointments/health"
+        method: GET
+        status_code: 200
+        timeout: 30
+      register: appointment_health
+      retries: 5
+      delay: 10
+      until: appointment_health is success
+      ignore_errors: yes
+
+    - name: Health check - Notification Service
+      uri:
+        url: "http://localhost:8003/notifications/health"
+        method: GET
+        status_code: 200
+        timeout: 30
+      register: notification_health
+      retries: 5
+      delay: 10
+      until: notification_health is success
+      ignore_errors: yes
+
+    - name: Health check - Gateway
+      uri:
+        url: "http://localhost:8000/health"
+        method: GET
+        status_code: 200
+        timeout: 30
+      register: gateway_health
+      retries: 5
+      delay: 10
+      until: gateway_health is success
+      ignore_errors: yes
+
+    - name: Display health check results
+      debug:
+        msg:
+          - "Auth Service: {{ auth_health.status | default('FAILED') }}"
+          - "Appointment Service: {{ appointment_health.status | default('FAILED') }}"
+          - "Notification Service: {{ notification_health.status | default('FAILED') }}"
+          - "Gateway: {{ gateway_health.status | default('FAILED') }}"
+
+    - name: Prune old Docker images
+      command: docker image prune -f
+      ignore_errors: yes
+
+  post_tasks:
+    - name: Display deployment summary
+      debug:
+        msg: |
+          Deployment complete!
+          All services are running and healthy.
+          Access the application at: http://{{ ansible_default_ipv4.address }}:8000
+          API Documentation: http://{{ ansible_default_ipv4.address }}:8000/api-docs

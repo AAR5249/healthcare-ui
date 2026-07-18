@@ -1,0 +1,63 @@
+groups:
+  - name: medibook_alerts
+    interval: 30s
+    rules:
+      # Service availability alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.instance }} has been down for more than 1 minute."
+
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status_code=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for more than 2 minutes."
+
+      # High response time alert
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is above 2 seconds."
+
+      # Memory usage alert
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / (1024 * 1024) > 512
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.service }}"
+          description: "Memory usage is above 512MB for more than 5 minutes."
+
+      # Request rate spike
+      - alert: RequestRateSpike
+        expr: rate(http_requests_total[1m]) > 1000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unusual request rate detected"
+          description: "Request rate has spiked above 1000 requests per second."
+
+      # Service health check failure
+      - alert: HealthCheckFailing
+        expr: increase(http_requests_total{route="/health",status_code!="200"}[5m]) > 3
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Health check failing for {{ $labels.service }}"
+          description: "Health check endpoint is returning non-200 status codes."

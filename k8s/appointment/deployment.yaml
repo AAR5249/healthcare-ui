@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-service
+  labels:
+    app: medibook
+    service: appointment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: medibook
+      service: appointment
+  template:
+    metadata:
+      labels:
+        app: medibook
+        service: appointment
+    spec:
+      containers:
+        - name: appointment-service
+          image: medibook/appointment-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8002
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: medibook-config
+                  key: APPOINTMENT_PORT
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: medibook-secrets
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: medibook-secrets
+                  key: REDIS_URL
+            - name: NOTIFICATION_CHANNEL
+              valueFrom:
+                configMapKeyRef:
+                  name: medibook-config
+                  key: NOTIFICATION_CHANNEL
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /appointments/health
+              port: 8002
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /appointments/health
+              port: 8002
+            initialDelaySeconds: 15
+            periodSeconds: 60
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appointment-service
+  labels:
+    app: medibook
+    service: appointment
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8002
+      targetPort: 8002
+      protocol: TCP
+      name: http
+  selector:
+    app: medibook
+    service: appointment
