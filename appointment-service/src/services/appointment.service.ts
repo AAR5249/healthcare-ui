@@ -7,6 +7,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 const logger = createLogger('appointment-service');
 
+// Helper function to convert Prisma appointment to API response format
+const formatAppointment = (appointment: any): Appointment => ({
+  ...appointment,
+  date: appointment.date instanceof Date ? appointment.date.toISOString().split('T')[0] : appointment.date,
+});
+
 export class AppointmentService {
   static async createAppointment(data: CreateAppointmentDto): Promise<Appointment> {
     const existingAppointment = await prisma.appointment.findFirst({
@@ -41,7 +47,7 @@ export class AppointmentService {
     await eventPublisher.publishAppointmentCreated(appointment);
     logger.info(`Appointment created: ${appointment.id}`, { appointmentId: appointment.id });
 
-    return appointment as Appointment;
+    return formatAppointment(appointment);
   }
 
   static async getAppointments(filter: AppointmentFilter): Promise<Appointment[]> {
@@ -57,7 +63,7 @@ export class AppointmentService {
       orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
     });
 
-    return appointments as Appointment[];
+    return appointments.map(formatAppointment);
   }
 
   static async getAppointmentById(id: string): Promise<Appointment | null> {
@@ -65,7 +71,7 @@ export class AppointmentService {
       where: { id },
     });
 
-    return appointment as Appointment | null;
+    return appointment ? formatAppointment(appointment) : null;
   }
 
   static async updateAppointment(id: string, data: UpdateAppointmentDto): Promise<Appointment> {
@@ -96,7 +102,7 @@ export class AppointmentService {
 
     logger.info(`Appointment updated: ${id}`, { appointmentId: id, data });
 
-    return appointment as Appointment;
+    return formatAppointment(appointment);
   }
 
   static async deleteAppointment(id: string): Promise<void> {
